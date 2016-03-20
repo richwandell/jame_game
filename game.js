@@ -11,7 +11,6 @@
         {"color": "green", "p": 450},
         {"color": "brown", "p": 200}
     ];
-    var blml = 0, blmld = 0;
 
     function start() {
 
@@ -90,7 +89,46 @@
                         lb.toggle("explode").remove();
                         lbm[0][1].toggle("explode").remove();
                         lbm[2][1].toggle("explode").remove();
+                    }else if(
+                        lbc != "gold" &&
+                        lbc == lbm[2][0].attr("data-color") &&
+                        lbc == lbm[2][1].attr("data-color") &&
+                        lbc == lbm[1][0].attr("data-color")){
+                        var p = $.grep(rainbow, function(bow){
+                            return bow.color == lbc;
+                        });
+                        points += p[0].p * 4;
+                        found = true;
+                        lb.animate({
+                            "border-radius": "0px",
+                            backgroundColor: "#FFD700",
+                            boxShadow: "none",
+                            "padding": "5px",
+                            "margin": "0px"
+                        }).attr("data-color", "gold");
+                        lbm[2][0].animate({
+                            "border-radius": "0px",
+                            backgroundColor: "#FFD700",
+                            boxShadow: "none",
+                            "padding": "5px",
+                            "margin": "0px"
+                        }).attr("data-color", "gold");
+                        lbm[2][1].animate({
+                            "border-radius": "0px",
+                            backgroundColor: "#FFD700",
+                            boxShadow: "none",
+                            "padding": "5px",
+                            "margin": "0px"
+                        }).attr("data-color", "gold");
+                        lbm[1][0].animate({
+                            "border-radius": "0px",
+                            backgroundColor: "#FFD700",
+                            boxShadow: "none",
+                            "padding": "5px",
+                            "margin": "0px"
+                        }).attr("data-color", "gold");
                     }
+
                 }else if( x == 0 && y > 0 ){
                     var lbm = [
                         [
