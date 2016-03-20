@@ -15,8 +15,8 @@
 
     function start() {
 
-        for (var x = 0; x < 20; x++) {
-            if (x % 5 == 0) {
+        for (var x = 0; x < 70; x++) {
+            if (x % 10 == 0) {
                 $("#little_box_container_container").append(little_box_container);
             }
             $(".little_box_container:last").append(little_box_prototype);
@@ -27,10 +27,9 @@
         }
 
         $(".little_box").click(function (event) {
-            var color = $(this).attr("data-color");
-            var boxes_like_me = $(".little_box[data-color=" + color + "]");
-            boxes_like_me.toggle("explode").promise().done(function() {
-                boxes_like_me.remove();
+            $(this).toggle("explode").promise().done(function() {
+                $(this).remove();
+                points += 10;
                 look_for_points();
             });
         });
@@ -41,37 +40,142 @@
      **/
     function look_for_points(){
         console.log("look for points");
-        //Go through all colors in our rainbow
-        $.each(rainbow, function(i, bow){
-            var index = -1, pindex = -1, good = 0;
-            $(".little_box[data-color='"+bow.color+"']").each(function(i, box){
-                var nindex = $(box).index();
-                var npindex = $($(box).parents("div")[0]).index();
-                if(index == -1 && pindex == -1){
-                    index = nindex;
-                    pindex = npindex;
-                }
-                var diff = npindex - pindex;
-                if((diff == 1 || diff == 0) && index == nindex){
-                    pindex = npindex;
-                    index = nindex;
-                    good += 1;
-                    if(good > 2){
-                        points += bow.p;
-                        $("#points").html("Score: " + points);
-                        var color = bow.color;
-                        var boxes_like_me = $(".little_box[data-color="+color+"]");
-                        boxes_like_me.toggle("explode").promise().done(function() {
-                            boxes_like_me.remove();
-                            look_for_points();
-                        });
-                    }
-                }else{
-                    index = -1;
-                    pindex = -1;
-                }
-            });
+        $(".little_box").each(function(i, box){
+            $(this).attr("data-y", $(this).index());
+            $(this).attr("data-x", $(this).parent().index());
         });
+
+        var xl = $(".little_box_container").length;
+        var found = false;
+        for(var x = 0; x < xl; x++){
+            var lbl = $($(".little_box_container")[x]).find(".little_box").length;
+            for(var y = 0; y < lbl; y++){
+                var lb = $(".little_box[data-x='"+x+"'][data-y='"+y+"']");
+                var lbc = lb.attr("data-color");
+                if(x > 0 && y > 0){
+                    var lbm = [
+                        [
+                            $("div.little_box[data-x='"+ (x-1) +"'][data-y='"+ (y+1) +"']"),
+                            $("div.little_box[data-x='"+ x +"'][data-y='"+ (y+1) +"']"),
+                            $("div.little_box[data-x='"+ (x+1) +"'][data-y='"+ (y+1) +"']")
+                        ],
+                        [
+                            $("div.little_box[data-x='"+ (x-1) +"'][data-y='"+ y +"']"),
+                            lb,
+                            $("div.little_box[data-x='"+ (x+1) +"'][data-y='"+ y +"']")
+                        ],
+                        [
+                            $("div.little_box[data-x='"+ (x-1) +"'][data-y='"+ (y-1) +"']"),
+                            $("div.little_box[data-x='"+ x +"'][data-y='"+ (y-1) +"']"),
+                            $("div.little_box[data-x='"+ (x+1) +"'][data-y='"+ (y-1) +"']")
+                        ]
+                    ];
+                    var llbc = lbm[1][0].attr("data-color");
+                    var rlbc = lbm[1][2].attr("data-color");
+                    if(lbc == llbc && lbc == rlbc){
+                        var p = $.grep(rainbow, function(bow){
+                            return bow.color == lbc;
+                        });
+                        points += p[0].p;
+                        found = true;
+                        lb.toggle("explode").remove();
+                        lbm[1][0].toggle("explode").remove();
+                        lbm[1][2].toggle("explode").remove();
+                    }else if(lbc == lbm[0][1].attr("data-color") && lbc == lbm[2][1].attr("data-color")){
+                        var p = $.grep(rainbow, function(bow){
+                            return bow.color == lbc;
+                        });
+                        points += p[0].p;
+                        found = true;
+                        lb.toggle("explode").remove();
+                        lbm[0][1].toggle("explode").remove();
+                        lbm[2][1].toggle("explode").remove();
+                    }
+                }else if( x == 0 && y > 0 ){
+                    var lbm = [
+                        [
+                            $("div.little_box[data-x='0'][data-y='"+ (y+1) +"']"),
+                            $("div.little_box[data-x='1'][data-y='"+ (y+1) +"']"),
+                            $("div.little_box[data-x='2'][data-y='"+ (y+1) +"']")
+                        ],
+                        [
+                            lb,
+                            $("div.little_box[data-x='1'][data-y='"+ y +"']"),
+                            $("div.little_box[data-x='2'][data-y='"+ y +"']")
+                        ],
+                        [
+                            $("div.little_box[data-x='0'][data-y='"+ (y-1) +"']"),
+                            $("div.little_box[data-x='1'][data-y='"+ (y-1) +"']"),
+                            $("div.little_box[data-x='2'][data-y='"+ (y-1) +"']")
+                        ]
+                    ];
+                    var rlbc = lbm[1][1].attr("data-color");
+                    var nrlbc = lbm[1][2].attr("data-color");
+                    if(lbc == nrlbc && lbc == rlbc){
+                        var p = $.grep(rainbow, function(bow){
+                            return bow.color == lbc;
+                        });
+                        points += p[0].p;
+                        found = true;
+                        lb.toggle("explode").remove();
+                        lbm[1][1].toggle("explode").remove();
+                        lbm[1][2].toggle("explode").remove();
+                    }else if(lbc == lbm[0][0].attr("data-color") && lbc == lbm[2][0].attr("data-color")){
+                        var p = $.grep(rainbow, function(bow){
+                            return bow.color == lbc;
+                        });
+                        points += p[0].p;
+                        found = true;
+                        lb.toggle("explode").remove();
+                        lbm[0][0].toggle("explode").remove();
+                        lbm[2][0].toggle("explode").remove();
+                    }
+                }else if ( x > 0 && y == 0){
+                    var lbm = [
+                        [
+                            $("div.little_box[data-x='"+ (x - 1) +"'][data-y='"+ (y + 2) +"']"),
+                            $("div.little_box[data-x='"+ x + "'][data-y='"+ (y + 2) +"']"),
+                            $("div.little_box[data-x='" + (x+1) + "'][data-y='"+ (y + 2) +"']")
+                        ],
+                        [
+                            $("div.little_box[data-x='"+ (x - 1) +"'][data-y='"+ (y + 1) +"']"),
+                            $("div.little_box[data-x='"+ x + "'][data-y='"+ (y + 1) +"']"),
+                            $("div.little_box[data-x='" + (x+1) + "'][data-y='"+ (y + 1) +"']")
+                        ],
+                        [
+                            $("div.little_box[data-x='"+ (x - 1) +"'][data-y='0']"),
+                            lb,
+                            $("div.little_box[data-x='" + (x+1) + "'][data-y='0']")
+                        ]
+                    ];
+                    var llbc = lbm[2][0].attr("data-color");
+                    var rlbc = lbm[2][2].attr("data-color");
+                    if(lbc == llbc && lbc == rlbc){
+                        var p = $.grep(rainbow, function(bow){
+                            return bow.color == lbc;
+                        });
+                        points += p[0].p;
+                        found = true;
+                        lb.toggle("explode").remove();
+                        lbm[2][0].toggle("explode").remove();
+                        lbm[2][2].toggle("explode").remove();
+                    }else if(lbc == lbm[0][1].attr("data-color") && lbc == lbm[1][1].attr("data-color")){
+                        var p = $.grep(rainbow, function(bow){
+                            return bow.color == lbc;
+                        });
+                        points += p[0].p;
+                        found = true;
+                        lb.toggle("explode").remove();
+                        lbm[0][1].toggle("explode").remove();
+                        lbm[1][1].toggle("explode").remove();
+                    }
+                }
+            }
+        }
+        $("#points").html("Score: " + points);
+        if(found){
+            look_for_points();
+        }
     }
 
     $(document).ready(start);
