@@ -13,9 +13,11 @@
     ];
     var little_boxes = [];
     var metal_clank = false;
+    var robot = false;
 
     function start() {
         metal_clank = $("#metal_clank")[0];
+        robot = $("#robot")[0];
         for (var x = 0; x < 70; x++) {
             if (x % 10 == 0) {
                 $("#little_box_container_container").append(little_box_container);
@@ -30,7 +32,11 @@
         $(".little_box").click(function (event) {
             $(this).toggle("explode").promise().done(function() {
                 $(this).remove();
-                points += 10;
+                if($(this).attr("data-color") == "gold"){
+                    points += 30;
+                }else {
+                    points += 10;
+                }
                 look_for_points();
             });
         });
@@ -97,33 +103,53 @@
             });
             points += p[0].p * 4;
             $(".little_box[data-x='" + x + "'][data-y='" + y + "']").animate({
-                "border-radius": "0px",
+                borderRadius: "0px 0px 0px 10px",
                 backgroundColor: "#FFD700",
-                boxShadow: "none",
+                boxShadow: "1px 1px 1px black",
                 "padding": "5px",
                 "margin": "0px"
-            }).attr("data-color", "gold");
+            }).attr("data-color", "gold").promise().done(function(){
+                $(this).css({
+                    "box-shadow": "none",
+                    "border-radius": "0px 0px 0px 10px"
+                });
+            });
             $(".little_box[data-x='" + (x - 1) + "'][data-y='" + y + "']").animate({
-                "border-radius": "0px",
+                borderRadius: "0px 0px 10px 0px",
                 backgroundColor: "#FFD700",
-                boxShadow: "none",
+                boxShadow: "1px 1px 1px black",
                 "padding": "5px",
                 "margin": "0px"
-            }).attr("data-color", "gold");
+            }).attr("data-color", "gold").promise().done(function(){
+                $(this).css({
+                    "box-shadow": "none",
+                    "border-radius": "0px 0px 10px 0px"
+                });
+            });
             $(".little_box[data-x='" + (x - 1) + "'][data-y='" + (y - 1) + "']").animate({
-                "border-radius": "0px",
+                borderRadius: "0px 10px 0px 0px",
                 backgroundColor: "#FFD700",
-                boxShadow: "none",
+                boxShadow: "1px 1px 1px black",
                 "padding": "5px",
                 "margin": "0px"
-            }).attr("data-color", "gold");
+            }).attr("data-color", "gold").promise().done(function(){
+                $(this).css({
+                    "box-shadow": "none",
+                    "border-radius": "0px 10px 0px 0px"
+                });
+            });
             $(".little_box[data-x='" + x + "'][data-y='" + (y - 1) + "']").animate({
-                "border-radius": "0px",
+                borderRadius: "10px 0px 0px 0px",
                 backgroundColor: "#FFD700",
-                boxShadow: "none",
+                boxShadow: "1px 1px 1px black",
                 "padding": "5px",
                 "margin": "0px"
-            }).attr("data-color", "gold");
+            }).attr("data-color", "gold").promise().done(function(){
+                $(this).css({
+                    "box-shadow": "none",
+                    "border-radius": "10px 0px 0px 0px"
+                });
+            });
             return true;
         }else{
             return false;
@@ -157,14 +183,14 @@
                         little_boxes[x + 1] && little_boxes[x + 1][y]
                     ) {
                         if (look_h_middle(x, y)) {
-                            found = true;
+                            found = 1;
                         }
                     }
                     if (
                         little_boxes[x] && little_boxes[x][y] && little_boxes[x][y + 1] && little_boxes[x][y - 1]
                     ) {
                         if (look_v_middle(x, y)) {
-                            found = true;
+                            found = 2;
                         }
                     }
                     if (
@@ -172,16 +198,22 @@
                         little_boxes[x - 1][y - 1] && little_boxes[x][y - 1]
                     ) {
                         if (look_box_middle(x, y)) {
-                            found = true;
+                            found = 3;
                         }
                     }
                 }
             }
         }
         $("#points").html("Score: " + points);
-        if(found){
-            metal_clank.load();
-            metal_clank.play();
+        switch(found){
+            case 1:
+            case 2:
+                metal_clank.load();
+                metal_clank.play();
+                break;
+            case 3:
+                robot.load();
+                robot.play();
         }
     }
 
